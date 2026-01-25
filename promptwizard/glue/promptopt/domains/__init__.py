@@ -10,6 +10,7 @@ Supported domains:
 - legal: Legal information and guidance
 - finance: Financial and investment information
 - english_question: English test item generation
+- csat_english: CSAT (수능) English question generation by item number
 
 Usage:
     from promptwizard.glue.promptopt.domains import (
@@ -49,12 +50,14 @@ from .medical import MEDICAL_DOMAIN_CONFIG, MedicalDomainEvaluator
 from .legal import LEGAL_DOMAIN_CONFIG
 from .finance import FINANCE_DOMAIN_CONFIG
 from .english_question import ENGLISH_QUESTION_DOMAIN_CONFIG
+from .csat_english import CSAT_ENGLISH_DOMAIN_CONFIG
 
 # Register default domains
 DomainRegistry.register_domain(MEDICAL_DOMAIN_CONFIG, MedicalDomainEvaluator)
 DomainRegistry.register_domain(LEGAL_DOMAIN_CONFIG)
 DomainRegistry.register_domain(FINANCE_DOMAIN_CONFIG)
 DomainRegistry.register_domain(ENGLISH_QUESTION_DOMAIN_CONFIG)
+DomainRegistry.register_domain(CSAT_ENGLISH_DOMAIN_CONFIG)
 
 __all__ = [
     # Base classes
@@ -77,6 +80,7 @@ __all__ = [
     "LEGAL_DOMAIN_CONFIG",
     "FINANCE_DOMAIN_CONFIG",
     "ENGLISH_QUESTION_DOMAIN_CONFIG",
+    "CSAT_ENGLISH_DOMAIN_CONFIG",
 
     # Domain-specific evaluators
     "MedicalDomainEvaluator"

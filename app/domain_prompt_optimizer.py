@@ -35,6 +35,7 @@ from promptwizard.glue.promptopt.domains import (
     LEGAL_DOMAIN_CONFIG,
     FINANCE_DOMAIN_CONFIG,
     ENGLISH_QUESTION_DOMAIN_CONFIG,
+    CSAT_ENGLISH_DOMAIN_CONFIG,
 )
 
 # Import English question specific utilities
@@ -42,6 +43,13 @@ from promptwizard.glue.promptopt.domains.english_question.config import (
     QUESTION_TEMPLATES,
     DIFFICULTY_LEVELS,
     ACHIEVEMENT_STANDARDS,
+)
+
+# Import CSAT English specific utilities
+from promptwizard.glue.promptopt.domains.csat_english.config import (
+    ALL_CSAT_QUESTIONS,
+    LISTENING_QUESTIONS,
+    READING_QUESTIONS,
 )
 
 # Page configuration
@@ -187,7 +195,8 @@ def get_domain_config(domain_type: str) -> DomainConfig:
         "medical": MEDICAL_DOMAIN_CONFIG,
         "legal": LEGAL_DOMAIN_CONFIG,
         "finance": FINANCE_DOMAIN_CONFIG,
-        "english_question": ENGLISH_QUESTION_DOMAIN_CONFIG
+        "english_question": ENGLISH_QUESTION_DOMAIN_CONFIG,
+        "csat_english": CSAT_ENGLISH_DOMAIN_CONFIG
     }
     return configs.get(domain_type)
 
@@ -206,7 +215,8 @@ def render_domain_selector():
         "medical": "🏥 의료/헬스케어",
         "legal": "⚖️ 법률",
         "finance": "💰 금융/투자",
-        "english_question": "📝 영어문항생성"
+        "english_question": "📝 영어문항생성",
+        "csat_english": "🎓 수능영어 문항번호별 생성"
     }
 
     selected_domain = st.sidebar.selectbox(
@@ -489,6 +499,259 @@ def render_english_question_input():
         selected_difficulty_id,
         selected_standard
     )
+
+
+def render_csat_english_input():
+    """Render CSAT English question generation specific input section."""
+    st.header("🎓 수능영어 문항번호별 생성")
+
+    # Question number selection
+    st.subheader("1️⃣ 문항 번호 선택")
+
+    # Create tabs for listening and reading
+    tab_listening, tab_reading = st.tabs(["🎧 듣기 (1-17번)", "📖 독해 (18-45번)"])
+
+    selected_question = None
+    selected_number = None
+
+    with tab_listening:
+        st.markdown("**듣기 영역 문항 (1-17번)**")
+
+        listening_options = {
+            "1": "1번 - 목적 파악",
+            "2": "2번 - 의견 파악",
+            "3": "3번 - 관계 파악",
+            "4": "4번 - 그림 내용 일치",
+            "5": "5번 - 할 일 파악",
+            "6": "6번 - 금액 파악",
+            "7": "7번 - 이유 파악",
+            "8": "8번 - 언급되지 않은 것",
+            "9": "9번 - 내용 일치",
+            "10": "10번 - 도표 내용 일치",
+            "11": "11번 - 적절한 응답 (짧은 대화)",
+            "12": "12번 - 적절한 응답 (짧은 대화)",
+            "13": "13번 - 적절한 응답 (긴 대화)",
+            "14": "14번 - 적절한 응답 (긴 대화)",
+            "15": "15번 - 상황에 적절한 말",
+            "16-17": "16-17번 - 세트 문항 (담화)",
+        }
+
+        selected_listening = st.selectbox(
+            "듣기 문항 선택",
+            options=list(listening_options.keys()),
+            format_func=lambda x: listening_options[x],
+            key="listening_select"
+        )
+
+        if selected_listening:
+            selected_number = selected_listening
+            selected_question = LISTENING_QUESTIONS.get(selected_listening)
+
+    with tab_reading:
+        st.markdown("**독해 영역 문항 (18-45번)**")
+
+        # Organize reading questions by category
+        col1, col2 = st.columns(2)
+
+        with col1:
+            reading_category = st.radio(
+                "문항 유형 카테고리",
+                options=["기본 독해", "어법/어휘", "빈칸 추론", "글의 구조", "장문"],
+                horizontal=False
+            )
+
+        with col2:
+            if reading_category == "기본 독해":
+                reading_options = {
+                    "18": "18번 - 목적 파악",
+                    "19": "19번 - 심경/분위기 파악",
+                    "20": "20번 - 주장 파악",
+                    "22": "22번 - 요지 파악",
+                    "23": "23번 - 주제 파악",
+                    "24": "24번 - 제목 파악",
+                    "25": "25번 - 도표 이해",
+                    "26": "26번 - 내용 일치 (인물)",
+                    "27": "27번 - 내용 일치 (실용문)",
+                }
+            elif reading_category == "어법/어휘":
+                reading_options = {
+                    "28": "28번 - 어법 (밑줄형) [3점]",
+                    "29": "29번 - 어휘 (밑줄형) [3점]",
+                }
+            elif reading_category == "빈칸 추론":
+                reading_options = {
+                    "21": "21번 - 함축 의미 추론 [3점] ⭐고난도",
+                    "30": "30번 - 빈칸 추론 (구/절)",
+                    "31": "31번 - 빈칸 추론 (구/절)",
+                    "32": "32번 - 빈칸 추론 [3점] ⭐고난도",
+                    "33": "33번 - 빈칸 추론 [3점] ⭐고난도",
+                    "34": "34번 - 빈칸 추론 [3점] ⭐고난도",
+                }
+            elif reading_category == "글의 구조":
+                reading_options = {
+                    "35": "35번 - 무관한 문장",
+                    "36": "36번 - 순서 배열",
+                    "37": "37번 - 순서 배열",
+                    "38": "38번 - 문장 삽입",
+                    "39": "39번 - 문장 삽입",
+                    "40": "40번 - 요약문 완성",
+                }
+            else:  # 장문
+                reading_options = {
+                    "41-42": "41-42번 - 장문 (제목/어휘)",
+                    "43-45": "43-45번 - 장문 (순서/지칭/내용일치)",
+                }
+
+            selected_reading = st.selectbox(
+                "독해 문항 선택",
+                options=list(reading_options.keys()),
+                format_func=lambda x: reading_options[x],
+                key="reading_select"
+            )
+
+            if selected_reading:
+                selected_number = selected_reading
+                selected_question = READING_QUESTIONS.get(selected_reading)
+
+    st.divider()
+
+    # Show selected question info
+    if selected_question:
+        st.subheader("2️⃣ 선택된 문항 정보")
+
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("문항 번호", f"{selected_number}번")
+        with col2:
+            st.metric("배점", f"{selected_question.point}점")
+        with col3:
+            difficulty_emoji = {"상": "🔴", "중": "🟡", "하": "🟢"}.get(selected_question.difficulty, "⚪")
+            st.metric("난이도", f"{difficulty_emoji} {selected_question.difficulty}")
+
+        st.info(f"**{selected_question.type_name}** ({selected_question.type_name_en})")
+        st.write(f"📋 {selected_question.description}")
+
+        if selected_question.key_skills:
+            st.write("**핵심 능력:**")
+            for skill in selected_question.key_skills:
+                st.write(f"  • {skill}")
+
+        if selected_question.tips:
+            with st.expander("💡 출제 팁 보기"):
+                for tip in selected_question.tips:
+                    st.write(f"• {tip}")
+
+        if selected_question.stem_template:
+            st.write("**발문 템플릿:**")
+            st.code(selected_question.stem_template, language="text")
+
+        st.divider()
+
+        # Additional options
+        st.subheader("3️⃣ 세부 설정")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            num_questions = st.number_input("생성할 문항 수", min_value=1, max_value=5, value=1, key="csat_num")
+
+            if selected_question.category == "독해" and selected_question.passage_length:
+                st.write(f"**권장 지문 길이:** {selected_question.passage_length}")
+
+        with col2:
+            topic = st.text_input(
+                "지문 주제 (선택)",
+                placeholder="예: 환경, 기술, 심리학, 교육",
+                key="csat_topic"
+            )
+            include_explanation = st.checkbox("정답 해설 포함", value=True, key="csat_explain")
+
+        additional_instructions = st.text_area(
+            "추가 지시사항 (선택)",
+            placeholder="예: EBS 연계 스타일로 작성해주세요. / 최신 수능 경향을 반영해주세요.",
+            height=80,
+            key="csat_additional"
+        )
+
+        st.divider()
+
+        # Generate prompt
+        st.subheader("4️⃣ 프롬프트 생성")
+
+        if st.button("🚀 수능 문항 프롬프트 생성", type="primary", key="csat_generate"):
+            # Build prompt based on question type
+            if selected_question.prompt_template:
+                generated_prompt = selected_question.prompt_template.format(
+                    output_format=selected_question.output_format or "JSON 형식으로 출력",
+                    additional_instructions=additional_instructions if additional_instructions else "없음"
+                )
+            else:
+                # Default template for questions without specific template
+                generated_prompt = f"""당신은 수능 영어 출제 전문가입니다.
+
+## 문항 유형: {selected_number}번 - {selected_question.type_name}
+## 영역: {selected_question.category}
+## 난이도: {selected_question.difficulty} ({selected_question.point}점)
+
+다음 조건에 맞는 수능 {selected_number}번 유형 문항을 생성하세요.
+
+### 문항 설명:
+{selected_question.description}
+
+### 발문 형식:
+{selected_question.stem_template}
+
+### 핵심 능력:
+{', '.join(selected_question.key_skills) if selected_question.key_skills else '일반적 독해/듣기 능력'}
+
+### 출력 형식:
+```json
+{{
+  "item_number": {selected_number.split('-')[0]},
+  "item_type": "{selected_question.type_name_en.lower().replace(' ', '_')}",
+  "point": {selected_question.point},
+  "stem": "발문",
+  "passage": "지문/스크립트",
+  "options": [
+    {{"number": "①", "text": "선택지1", "is_answer": false}},
+    {{"number": "②", "text": "선택지2", "is_answer": false}},
+    {{"number": "③", "text": "선택지3", "is_answer": true}},
+    {{"number": "④", "text": "선택지4", "is_answer": false}},
+    {{"number": "⑤", "text": "선택지5", "is_answer": false}}
+  ],
+  "answer": "③",
+  "explanation": "정답 해설"
+}}
+```
+
+### 추가 조건:
+- 주제: {topic if topic else '자유 주제'}
+- 해설 포함: {'예' if include_explanation else '아니오'}
+- 생성 문항 수: {num_questions}개
+
+### 추가 지시사항:
+{additional_instructions if additional_instructions else '없음'}
+"""
+
+            st.session_state['csat_generated_prompt'] = generated_prompt
+
+        # Show generated prompt
+        if 'csat_generated_prompt' in st.session_state and st.session_state['csat_generated_prompt']:
+            st.subheader("생성된 프롬프트")
+            st.code(st.session_state['csat_generated_prompt'], language="markdown")
+
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("📋 프롬프트 복사", key="csat_copy"):
+                    st.success("프롬프트가 복사되었습니다!")
+            with col2:
+                if st.button("🔄 프롬프트 초기화", key="csat_reset"):
+                    st.session_state['csat_generated_prompt'] = ""
+                    st.rerun()
+
+        return st.session_state.get('csat_generated_prompt', ''), selected_number
+
+    return '', None
 
 
 def render_test_case_section(config: DomainConfig):
@@ -876,6 +1139,21 @@ def main():
                 st.subheader("👤 전문가 페르소나")
                 expert_prompt = optimizer.get_domain_expert_prompt()
                 st.code(expert_prompt, language="markdown")
+
+        elif selected_domain == "csat_english":
+            # Use specialized UI for CSAT English domain
+            result = render_csat_english_input()
+            base_inst = result[0] if result[0] else ""
+
+            if base_inst:
+                st.divider()
+                render_enhanced_prompt(optimizer, base_inst, config)
+
+                # Expert prompt
+                st.subheader("👤 전문가 페르소나")
+                expert_prompt = optimizer.get_domain_expert_prompt()
+                st.code(expert_prompt, language="markdown")
+
         else:
             # Default UI for other domains
             task_desc, base_inst, ans_format = render_prompt_input()
