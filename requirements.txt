@@ -1,0 +1,28 @@
+# PromptWizard - Streamlit Cloud Deployment Requirements
+
+# Web framework
+streamlit>=1.28.0
+
+# Data handling
+pyyaml>=6.0.1
+python-dotenv>=1.0.0
+
+# Core dependencies
+datasets
+tiktoken
+nltk
+openai>=1.0.0
+
+# Azure integration (optional)
+azure-identity>=1.15.0
+azure-search-documents
+
+# LlamaIndex (for advanced features)
+llama-index==0.11.10
+llama-index-core==0.11.10
+
+# Data processing
+pyarrow>=15.0.0
+
+# Utilities
+typing-extensions>=4.0.0
